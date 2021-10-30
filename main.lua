@@ -1,4 +1,7 @@
-﻿require('src/Dependencies');
+﻿if os.getenv("LOCAL_LUA_DEBUGGER_VSCODE") == "1" then
+    require("lldebugger").start()
+end
+require('src/Dependencies');
 
 function love.load()
     -- set title for game
@@ -27,9 +30,15 @@ function love.load()
         ['main'] = love.graphics.newImage('graphics/match3.png')
     }
 
+    -- load all sprites from texture
+    gSprites = {
+        ['candies'] = GetQuadsCandy(gTextures['main'])
+    }
+
     -- Init State machine
     gStateMachine = StateMachine({
         ['Welcome'] = function() return WelcomeState() end,
+        ['Play'] = function() return PlayState() end
     })
 
     gStateMachine:change('Welcome');
@@ -68,3 +77,6 @@ function love.draw()
     push:apply('end');
 end
 
+function love.conf(t)
+    t.console = true;
+end

@@ -19,8 +19,8 @@ function WelcomeState:update(dt)
 
     -- go to option
     if (love.keyboard.wasPress('return')) then
-        if (self.seletingOption == 0) then
-            
+        if (self.seletingOption == 1) then
+            gStateMachine:change('Play');
         end
     end
 end

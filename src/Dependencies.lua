@@ -11,3 +11,14 @@ require('src/Constants');
 require('src/StateMachine');
 require('src/states/BaseState');
 require('src/states/WelcomeState');
+require('src/states/PlayState');
+
+-- file has all global function
+require('src/Util');
+
+-- create items in each level
+require('src/LevelMaker');
+
+-- all objects in game
+require('src/objects/Candy');
+require('src/objects/GridBox');
