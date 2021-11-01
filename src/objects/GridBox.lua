@@ -53,6 +53,11 @@ function GridBox:insertCandy(candies)
 end
 
 function GridBox:update(dt)
+    -- Knife timer update
+    Timer.update(dt);
+    print(self.gridCandies[1][1].x.." "..self.gridCandies[1][1].y);
+    print(self.gridCandies[1][2].x.." "..self.gridCandies[1][2].y);
+
     -- get pos mouse in window
     local mouse = {
         x = love.mouse.pressed.x;
@@ -74,6 +79,10 @@ function GridBox:update(dt)
             self:selectCandy(candyPos);
     end
 
+end
+
+-- update all candy of grid follow grid pos
+function GridBox:updatePos()
     -- update all candy of gid
     for i = 1, self.rows do
         for j = 1, self.cols do
@@ -85,19 +94,55 @@ function GridBox:update(dt)
     end
 end
 
+-- click to select candy if it has candy is selected swap two candies
 function GridBox:selectCandy(candyPos)
     if (self.selectedCandy.x == 0 and self.selectedCandy.y == 0) then
         self.selectedCandy.x = candyPos.x;
         self.selectedCandy.y = candyPos.y;
     else 
-        self.gridCandies[candyPos.y][candyPos.x].type = 20; 
+        -- swap candy
+        self:swapCandy(
+            {x = candyPos.x, y = candyPos.y},
+            {x = self.selectedCandy.x, y = self.selectedCandy.y}
+        )
+
         self.selectedCandy.x = 0;
         self.selectedCandy.y = 0;
     end
 end
 
-function GridBox:swapCandy(firstCandy, secondCandy)
-    
+
+-- Animation swap two candy
+function GridBox:swapCandy(firstId, secondId)
+    -- save position of candy
+    local newFirstPos = {
+        x = self.gridCandies[secondId.y][secondId.x].x,
+        y = self.gridCandies[secondId.y][secondId.x].y
+    }
+    local newSecondPos = {
+        x = self.gridCandies[firstId.y][firstId.x].x,
+        y = self.gridCandies[firstId.y][firstId.x].y
+    }
+
+    -- animation move candy to new position
+    Timer.tween(0.5, {
+        [self.gridCandies[firstId.y][firstId.x]] = {
+            x = newFirstPos.x,
+            y = newFirstPos.y
+        }
+    });
+
+    Timer.tween(0.5, {
+        [self.gridCandies[secondId.y][secondId.x]] = {
+            x = newSecondPos.x,
+            y = newSecondPos.y
+        }
+    })
+
+    -- swap two candies in grid
+    local tmpCandy = self.gridCandies[secondId.y][secondId.x];
+    self.gridCandies[secondId.y][secondId.x] = self.gridCandies[firstId.y][firstId.x];
+    self.gridCandies[firstId.y][firstId.x] = tmpCandy;
 end
 
 function GridBox:render()

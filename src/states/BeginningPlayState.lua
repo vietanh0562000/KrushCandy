@@ -74,7 +74,8 @@ function BeginningPlayState:update(dt)
     Timer.update(dt);
 
     -- update position of grid
-    self.gridBox:update(dt);
+    self.gridBox:updatePos();
+
 end
 
 function BeginningPlayState:render()
