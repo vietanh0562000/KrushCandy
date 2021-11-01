@@ -11,6 +11,9 @@ function Candy:init(params)
 
     -- candy type
     self.type = params.type;
+
+    -- velocity candy move
+    
 end
 
 function Candy:changePos(params)

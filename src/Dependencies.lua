@@ -4,6 +4,9 @@ push = require('libs/push');
 -- library create base Class in lua
 Class = require('libs/class');
 
+-- library knife
+Timer = require('libs/knife/timer');
+
 -- all constants in game
 require('src/Constants');
 
@@ -12,6 +15,7 @@ require('src/StateMachine');
 require('src/states/BaseState');
 require('src/states/WelcomeState');
 require('src/states/PlayState');
+require('src/states/BeginningPlayState');
 
 -- file has all global function
 require('src/Util');

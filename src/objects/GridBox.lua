@@ -22,6 +22,12 @@ function GridBox:init(params)
             self.gridCandies[i][j] = nil;
         end
     end
+
+    -- id candy is selected;
+    self.selectedCandy = {
+        x = 0,
+        y = 0
+    }
 end
 
 function GridBox:insertCandy(candies)
@@ -47,32 +53,51 @@ function GridBox:insertCandy(candies)
 end
 
 function GridBox:update(dt)
-    if love.mouse.isDown(1) then
-        -- get pos mouse in window
-        local mouse = {
-            x = love.mouse.getX();
-            y = love.mouse.getY();
-        }
+    -- get pos mouse in window
+    local mouse = {
+        x = love.mouse.pressed.x;
+        y = love.mouse.pressed.y;
+    }
 
-        -- get pos mouse in virtual
-        mouse.x, mouse.y = push:toGame(mouse.x, mouse.y);
-        -- if click into the grid
-        if (mouse.x > self.x and mouse.y > self.y 
-            and mouse.x < self.x + self.width
-            and mouse.y < self.y + self.height) then
-                -- change from postion mouse click to position on grid
-                local candyPos = {
-                    x = math.floor((mouse.x - self.x) / 32) + 1,
-                    y = math.floor((mouse.y - self.y) / 32) + 1
-                }
-                -- select that candy
-                self:selectCandy(candyPos);
-            end
+    -- get pos mouse in virtual
+    mouse.x, mouse.y = push:toGame(mouse.x, mouse.y);
+    -- if click into the grid
+    if (mouse.x > self.x and mouse.y > self.y 
+        and mouse.x < self.x + self.width
+        and mouse.y < self.y + self.height) then
+            -- change from postion mouse click to position on grid
+            local candyPos = {
+                x = math.floor((mouse.x - self.x) / 32) + 1,
+                y = math.floor((mouse.y - self.y) / 32) + 1
+            }
+            -- select that candy
+            self:selectCandy(candyPos);
+    end
+
+    -- update all candy of gid
+    for i = 1, self.rows do
+        for j = 1, self.cols do
+            self.gridCandies[i][j]:changePos({   
+                x = self.x + (j-1) * 32,
+                y = self.y + (i-1) * 32
+            })
+        end
     end
 end
 
 function GridBox:selectCandy(candyPos)
-    self.gridCandies[candyPos.y][candyPos.x].type = 20;
+    if (self.selectedCandy.x == 0 and self.selectedCandy.y == 0) then
+        self.selectedCandy.x = candyPos.x;
+        self.selectedCandy.y = candyPos.y;
+    else 
+        self.gridCandies[candyPos.y][candyPos.x].type = 20; 
+        self.selectedCandy.x = 0;
+        self.selectedCandy.y = 0;
+    end
+end
+
+function GridBox:swapCandy(firstCandy, secondCandy)
+    
 end
 
 function GridBox:render()
