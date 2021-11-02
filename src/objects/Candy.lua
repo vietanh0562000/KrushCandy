@@ -25,5 +25,8 @@ function Candy:update(dt)
 end
 
 function Candy:render()
-    love.graphics.draw(gTextures['main'], gSprites['candies'][self.type], self.x, self.y);
+    if not (self.type == -1) then
+        love.graphics.draw(gTextures['main'], gSprites['candies'][self.type], self.x, self.y);    
+    end
+    
 end

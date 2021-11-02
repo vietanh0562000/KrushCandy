@@ -16,6 +16,7 @@ require('src/states/BaseState');
 require('src/states/WelcomeState');
 require('src/states/PlayState');
 require('src/states/BeginningPlayState');
+require('src/states/GameOverState');
 
 -- file has all global function
 require('src/Util');

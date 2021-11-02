@@ -40,6 +40,7 @@ function love.load()
         ['Welcome'] = function() return WelcomeState() end,
         ['Play'] = function() return PlayState() end,
         ['BeginningPlay'] = function() return BeginningPlayState() end,
+        ['GameOver'] = function() return GameOverState() end,
     })
 
     gStateMachine:change('Welcome');

@@ -1,6 +1,7 @@
 ﻿GridBox = Class{};
 
 function GridBox:init(params)
+    self.scoreGot = 0;
     -- top left position of grid on screen
     self.x = params.x;
     self.y = params.y;
@@ -28,8 +29,12 @@ function GridBox:init(params)
         x = 0,
         y = 0
     }
+
+    -- has animation on grid
+    self.hasAnim = false;
 end
 
+-- receive candies list. If the table has empties. A candy will be filled to it
 function GridBox:insertCandy(candies)
     local idCandy = 1;
 
@@ -53,10 +58,9 @@ function GridBox:insertCandy(candies)
 end
 
 function GridBox:update(dt)
+    self.scoreGot = 0;
     -- Knife timer update
     Timer.update(dt);
-    print(self.gridCandies[1][1].x.." "..self.gridCandies[1][1].y);
-    print(self.gridCandies[1][2].x.." "..self.gridCandies[1][2].y);
 
     -- get pos mouse in window
     local mouse = {
@@ -79,6 +83,100 @@ function GridBox:update(dt)
             self:selectCandy(candyPos);
     end
 
+    -- scan all grid to find match when grid no anim
+    if (not self.hasAnim) then
+        for i = 1, self.rows do
+            for j = 1, self.cols do
+                -- when not empty slot
+                if not (self.gridCandies[i][j].type == -1) then
+                    self:detectMatch(i, j);    
+                end
+            end
+        end 
+    end
+
+    -- update empty slot
+    for i = self.rows, 1, -1 do
+        for j = self.cols, 1, -1 do
+            if (self.gridCandies[i][j].type == -1) then
+                self:updateGrid(i, j);         
+            end
+        end
+    end
+end
+
+-- if slot (i, j) is empty find above candy to fall down. If it has no candy above create new one.
+function GridBox:updateGrid(i, j) 
+    -- findI is id of candy above slot(i, j)
+    local findI = i;
+    while (findI > 0 and self.gridCandies[findI][j].type == -1) do
+        findI = findI - 1;
+    end
+
+    -- findJ > 0 -> has candy. If not -> create new one to insert that slot
+    if (findI > 0) then
+        self.gridCandies[i][j] = self.gridCandies[findI][j];
+        self.gridCandies[findI][j] = Candy({type = -1});
+    else
+        local newCandy = Candy({type = math.random(1, 5)});
+        newCandy:changePos({
+            x = self.x + (j - 1) * 32,
+            y = -32
+        });
+        self.gridCandies[i][j] = newCandy;
+    end
+
+    -- Animation for new candy move to new position
+    Timer.tween(0.5, {
+        [self.gridCandies[i][j]] = {
+            y = self.y + (i - 1) * 32;
+        }
+    })
+end
+
+-- detect candy(i, j) whether it matchs with each other or not
+function GridBox:detectMatch(i, j)
+    -- matchJ and matchI is the furthest candy id match with candy(i, j)
+    local matchJ = j;
+    local matchI = i;
+
+    -- detect horizontal
+    while (matchJ + 1 <= self.cols) and
+        (self.gridCandies[i][matchJ].type == self.gridCandies[i][matchJ + 1].type) do
+        matchJ = matchJ + 1;
+    end
+
+    -- detect vertical
+    while (matchI + 1 <= self.rows) and
+        (self.gridCandies[matchI][j].type == self.gridCandies[matchI + 1][j].type) do
+        matchI = matchI + 1;
+    end
+
+    -- resolve when match set candies type to -1 (aka destroyed) after animation move
+    -- when candy became -1 scoreGot increase 1
+    -- horizontal
+    if (matchJ - j > 1) then
+        self.hasAnim = true;
+        Timer.after(0.5, function ()
+            for k = j, matchJ do
+                self.gridCandies[i][k].type = -1;
+                self.scoreGot = self.scoreGot + 1;
+            end    
+            self.hasAnim = false;
+        end)
+    end
+    -- vertical
+    if (matchI - i > 1) then
+        self.hasAnim = true;
+        Timer.after(0.5, function ()
+            for k = i, matchI do
+                self.gridCandies[k][j].type = -1;
+                self.scoreGot = self.scoreGot + 1;
+            end
+            self.hasAnim = false;
+        end)
+    end
+    
 end
 
 -- update all candy of grid follow grid pos
@@ -114,28 +212,15 @@ end
 
 -- Animation swap two candy
 function GridBox:swapCandy(firstId, secondId)
-    -- save position of candy
-    local newFirstPos = {
-        x = self.gridCandies[secondId.y][secondId.x].x,
-        y = self.gridCandies[secondId.y][secondId.x].y
-    }
-    local newSecondPos = {
-        x = self.gridCandies[firstId.y][firstId.x].x,
-        y = self.gridCandies[firstId.y][firstId.x].y
-    }
-
     -- animation move candy to new position
     Timer.tween(0.5, {
         [self.gridCandies[firstId.y][firstId.x]] = {
-            x = newFirstPos.x,
-            y = newFirstPos.y
-        }
-    });
-
-    Timer.tween(0.5, {
+            x = self.gridCandies[secondId.y][secondId.x].x,
+            y = self.gridCandies[secondId.y][secondId.x].y
+        },
         [self.gridCandies[secondId.y][secondId.x]] = {
-            x = newSecondPos.x,
-            y = newSecondPos.y
+            x = self.gridCandies[firstId.y][firstId.x].x,
+            y = self.gridCandies[firstId.y][firstId.x].y
         }
     })
 
